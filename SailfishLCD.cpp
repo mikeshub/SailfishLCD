@@ -17,16 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-//#include "Compat.hh"
-//#include "LiquidCrystalSerial.hh"
-//#include "Configuration.hh"
-
 #include "SailfishLCD.h"
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include <util/delay.h>
-//#include "TWI.hh"
+
 
 //*** These functions are for and LCD using a shift register, the stock makerbot
 // hardware.
@@ -40,9 +32,7 @@ void LiquidCrystalSerial::init(uint8_t strobe, uint8_t data, uint8_t clk) {
   _data_pin = data;
   _clk_pin = clk;
 
-//  _strobe_pin.setDirection(true);
-//  _data_pin.setDirection(true);
-//  _clk_pin.setDirection(true);
+
   pinMode(_strobe_pin, OUTPUT);
   pinMode(_data_pin, OUTPUT);
   pinMode(_clk_pin, OUTPUT);
@@ -51,7 +41,6 @@ void LiquidCrystalSerial::init(uint8_t strobe, uint8_t data, uint8_t clk) {
   digitalWrite(_clk_pin, LOW);
   _displayfunction = LCD_4BITMODE | LCD_1LINE | LCD_5x8DOTS;
 
-  // begin(16, 1);
 }
 
 // Initialization of a standard HD44780 display
@@ -71,7 +60,7 @@ void LiquidCrystalSerial::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
   // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
   // according to datasheet, we need at least 40ms after power rises above 2.7V
   // before sending commands. Arduino can turn on way befer 4.5V so we'll wait 50
-  _delay_us(50000);
+  delayMicroseconds(50000);
 
   // Now we pull both RS and R/W low to begin commands
   writeSerial(0b00000000);
@@ -81,15 +70,15 @@ void LiquidCrystalSerial::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
 
   // we start in 8bit mode, try to set 4 bit mode
   write4bits(0x03, false);
-  _delay_us(4500); // wait min 4.1ms
+  delayMicroseconds(4500); // wait min 4.1ms
 
   // second try
   write4bits(0x03, false);
-  _delay_us(4500); // wait min 4.1ms
+  delayMicroseconds(4500); // wait min 4.1ms
 
   // third go!
   write4bits(0x03, false);
-  _delay_us(150);
+  delayMicroseconds(150);
 
   // finally, set to 8-bit interface
   write4bits(0x02, false);
@@ -174,32 +163,32 @@ void LiquidCrystalSerial::write4bits(uint8_t value, bool dataMode) {
 
 void LiquidCrystalSerial::pulseEnable(uint8_t value) {
 
-  _delay_us(1);
+  delayMicroseconds(1);
   // set enable to true, on standard hardware it is 0b1000
   value |= 0b01000;
   writeSerial(value);
-  _delay_us(1); // enable pulse must be >450ns
+  delayMicroseconds(1); // enable pulse must be >450ns
   // set enable to false
   value &= 0b11110111;
   writeSerial(value);
-  _delay_us(1); // commands need > 37us to settle [citation needed]
+  delayMicroseconds(1); // commands need > 37us to settle [citation needed]
 }
 
 void LiquidCrystalSerial::writeSerial(uint8_t value) {
 
   for (int8_t i = 7; i >= 0; i--) {
 //    _clk_pin.setValue(false);
-	  digitalWrite(_clk_pin, LOW);
+    digitalWrite(_clk_pin, LOW);
     bool data = (value >> i) & 0x01 ? true : false;
     digitalWrite(_data_pin, data);
 //    _data_pin.setValue(data);
     digitalWrite(_clk_pin, HIGH);
 //    _clk_pin.setValue(true);
-    _delay_us(1);
+    delayMicroseconds(1);
   }
   digitalWrite(_strobe_pin, HIGH);
 //  _strobe_pin.setValue(true);
-  _delay_us(1);
+  delayMicroseconds(1);
   digitalWrite(_strobe_pin, LOW);
 //  _strobe_pin.setValue(false);
 }
@@ -207,12 +196,12 @@ void LiquidCrystalSerial::writeSerial(uint8_t value) {
 /********** high level commands, for the user! */
 void LiquidCrystalSerial::clear() {
   command(LCD_CLEARDISPLAY); // clear display, set cursor position to zero
-  _delay_us(2000);           // this command takes a long time!
+  delayMicroseconds(2000);           // this command takes a long time!
 }
 
 void LiquidCrystalSerial::home() {
   command(LCD_RETURNHOME); // set cursor position to zero
-  _delay_us(2000);         // this command takes a long time!
+  delayMicroseconds(2000);         // this command takes a long time!
 }
 
 // A faster version of home()
@@ -356,23 +345,23 @@ void LiquidCrystalSerial::writeInt32(uint32_t value, uint8_t digits) {
      bool nonzero_seen = false;
 
      if ( digits > 9 )
-	  digits = 9;
+    digits = 9;
 
      for (uint8_t i = digits; i; i--)
-	  currentDigit *= 10;
+    currentDigit *= 10;
 
      for (uint8_t i = digits; i; i--) {
-	  nextDigit = currentDigit / 10;
-	  char c;
-	  int8_t d = (value % currentDigit) / nextDigit;
-	  if ( nonzero_seen || d != 0 || i == 1) {
-	       c = d + '0';
-	       nonzero_seen = true;
-	  }
-	  else
-	       c = ' ';
-	  write(c);
-	  currentDigit = nextDigit;
+    nextDigit = currentDigit / 10;
+    char c;
+    int8_t d = (value % currentDigit) / nextDigit;
+    if ( nonzero_seen || d != 0 || i == 1) {
+         c = d + '0';
+         nonzero_seen = true;
+    }
+    else
+         c = ' ';
+    write(c);
+    currentDigit = nextDigit;
      }
 }
 
@@ -390,8 +379,8 @@ void LiquidCrystalSerial::writeFloat(float value, uint8_t decimalPlaces, uint8_t
         int tenscount = 0;
         int i;
         float tempfloat = value;
-	uint8_t p = 0;
-	char str[MAX_FLOAT_STR_LEN + 1];
+  uint8_t p = 0;
+  char str[MAX_FLOAT_STR_LEN + 1];
 
         // make sure we round properly. this could use pow from <math.h>, but doesn't seem worth the import
         // if this rounding step isn't here, the value  54.321 prints as 54.3209
@@ -429,55 +418,55 @@ void LiquidCrystalSerial::writeFloat(float value, uint8_t decimalPlaces, uint8_t
 
         // if no decimalPlaces after decimal, stop now and return
         if (decimalPlaces > 0) {
-		// otherwise, write the point and continue on
-		str[p++] = '.';
+    // otherwise, write the point and continue on
+    str[p++] = '.';
 
-		// now write out each decimal place by shifting digits one by one into the ones place and writing the truncated value
-		for (i = decimalPlaces; i; i--) {
-			tempfloat *= 10.0;
-			digit = (int) tempfloat;
-			str[p++] = digit+'0';
-			// once written, subtract off that digit
-			tempfloat = tempfloat - (float) digit;
-		}
-	}
+    // now write out each decimal place by shifting digits one by one into the ones place and writing the truncated value
+    for (i = decimalPlaces; i; i--) {
+      tempfloat *= 10.0;
+      digit = (int) tempfloat;
+      str[p++] = digit+'0';
+      // once written, subtract off that digit
+      tempfloat = tempfloat - (float) digit;
+    }
+  }
 
-	str[p] = '\0';
+  str[p] = '\0';
 
-	if ( rightJustifyToCol ) {
-		setCursorExt(rightJustifyToCol - p, -1);
-	}
-	writeString(str);
+  if ( rightJustifyToCol ) {
+    setCursorExt(rightJustifyToCol - p, -1);
+  }
+  writeString(str);
 }
 
 char* LiquidCrystalSerial::writeLine(char* message) {
-	char* letter = message;
-	while (*letter != 0 && *letter != '\n') {
-		//INTERFACE_RLED.setValue(true);
-		write(*letter);
-		letter++;
+  char* letter = message;
+  while (*letter != 0 && *letter != '\n') {
+    //INTERFACE_RLED.setValue(true);
+    write(*letter);
+    letter++;
 
-	}
-	return letter;
+  }
+  return letter;
 }
 
 void LiquidCrystalSerial::writeString(char message[]) {
-	char* letter = message;
-	while (*letter != 0) {
-		write(*letter);
-		letter++;
-	}
+  char* letter = message;
+  while (*letter != 0) {
+    write(*letter);
+    letter++;
+  }
 }
 
 void LiquidCrystalSerial::writeFromPgmspace(const unsigned char message[]) {
-	char letter;
-	while ((letter = pgm_read_byte(message++)))
-		write(letter);
+  char letter;
+  while ((letter = pgm_read_byte(message++)))
+    write(letter);
 }
 
 void LiquidCrystalSerial::moveWriteFromPgmspace(uint8_t col, uint8_t row,
-						const unsigned char message[]) {
-	setCursor(col, row);
-	writeFromPgmspace(message);
+            const unsigned char message[]) {
+  setCursor(col, row);
+  writeFromPgmspace(message);
 }
 

@@ -9,6 +9,8 @@
 #ifndef SAILFISHLCD_H_
 #define SAILFISHLCD_H_
 
+#include <Arduino.h>
+
 /* StandardLiquidCrystalSerial
  *
  * This is an implementation of communciation routines for the
