@@ -86,13 +86,6 @@
 #define LCD_CUSTOM_CHAR_UP 0x5e     // ^
 #define LCD_CUSTOM_CHAR_RIGHT 0x7e // right pointing arrow (0x7f is left pointing)
 
-#include <Arduino.h>
-#include <stdint.h>
-#include <avr/pgmspace.h>
-//#include "SailfishSerialLCD.h"
-//#include "Pin.hh"
-//#include "LiquidCrystalSerial.hh"
-
 class LiquidCrystalSerial : public Print{
 
 public:
