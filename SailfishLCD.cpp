@@ -22,12 +22,12 @@
 
 //*** These functions are for and LCD using a shift register, the stock makerbot
 // hardware.
-LiquidCrystalSerial::LiquidCrystalSerial(uint8_t strobe, uint8_t data,
-                                                         uint8_t CLK) {
+LiquidCrystalSerial::LiquidCrystalSerial(int strobe, int data,
+                                                         int CLK) {
   init(strobe, data, CLK);
 }
 
-void LiquidCrystalSerial::init(uint8_t strobe, uint8_t data, uint8_t clk) {
+void LiquidCrystalSerial::init(int strobe, int data, int clk) {
   _strobe_pin = strobe;
   _data_pin = data;
   _clk_pin = clk;

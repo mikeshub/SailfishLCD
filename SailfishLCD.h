@@ -89,8 +89,8 @@
 class LiquidCrystalSerial : public Print{
 
 public:
-	LiquidCrystalSerial(uint8_t strobe, uint8_t data, uint8_t CLK);
-	void init(uint8_t strobe, uint8_t data, uint8_t CLK);
+	LiquidCrystalSerial(int strobe, int data, int CLK);
+	void init(int strobe, int data, int CLK);
 	void begin(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);
 	void clear();
 	void home();
